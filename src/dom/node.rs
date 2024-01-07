@@ -7,9 +7,9 @@ pub type AttrMap = HashMap<String, String>;
 /// Represents the data associated with an HTML element.
 pub struct ElementData {
     /// The tag name of the HTML element.
-    tag_name: String,
+    pub(crate) tag_name: String,
     /// The attributes associated with the HTML element.
-    attributes: AttrMap,
+    pub(crate) attributes: AttrMap,
 }
 
 impl ElementData {
@@ -50,9 +50,34 @@ pub enum NodeType {
 /// Represents a node in the DOM tree, containing child nodes and node type information.
 pub struct Node {
     /// The list of child nodes contained within this node.
-    children: Vec<Node>,
+    pub(crate) children: Vec<Node>,
     /// The type of node, either text or element.
-    node_type: NodeType,
+    pub(crate) node_type: NodeType,
+}
+
+impl Node {
+    pub fn pretty_print(&self, indent: usize) {
+        match &self.node_type {
+            NodeType::Element(element_data) => {
+                println!(
+                    "{:indent$}<{}>",
+                    "",
+                    element_data.tag_name,
+                    indent = indent * 2
+                );
+                for child in &self.children {
+                    child.pretty_print(&indent + 1);
+                }
+                println!("{:indent$}</{}>", "", element_data.tag_name, indent = indent * 2);
+            }
+            NodeType::Text(text) => {
+                println!("{:indent$}{}", "", text, indent = indent * 2);
+            }
+            NodeType::Comment(comment) => {
+                println!("{:indent$}<!-- {} -->", "", comment, indent = indent * 2);
+            }
+        }
+    }
 }
 
 /// Creates a new text node with the given text data.
